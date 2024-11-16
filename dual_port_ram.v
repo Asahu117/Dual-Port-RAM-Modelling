@@ -1,52 +1,57 @@
-`timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 16.11.2024 17:02:56
-// Design Name: 
-// Module Name: dual_port_ram
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
+
+ // 2^NxM DUAL PORT SYNCHRONOUS RAM
+ // N=NO.OF ADDRESS LINES
+ // M=LENGTH OF  WORD IN BITS IN EACH MEMORY LOCATION
+
+  module dual_port_sync_ram(data_in_a,data_in_b,addr_a,addr_b,wr_a,wr_b,data_out_a,data_out_b,clk);
+
+   parameter N=6,M=8;
+
+  input [M-1:0] data_in_a,data_in_b;
+  input [N-1:0] addr_a,addr_b;
+  input wr_a,wr_b,clk;
+
+  output  reg [M-1:0]  data_out_a,data_out_b;
 
 
-// Dual Port RAM module design
+  // RAM DECLARATION
 
-module dual_port_ram(
-  input [7:0] data_a, data_b, //input data
-  input [5:0] addr_a, addr_b, //Port A and Port B address
-  input we_a, we_b, //write enable for Port A and Port B
-  input clk, //clk
-  output reg [7:0] q_a, q_b //output data at Port A and Port B
-);
+  reg [M-1:0] ram [0:2**N-1];
   
-  reg [7:0] ram [63:0]; //8*64 bit ram
+  // For port A
 
- 
-  always @ (posedge clk)
+  always@(posedge clk)
+  begin
+   if(wr_a)
+   begin
+     ram[addr_a]<=data_in_a;
+     // data_out is required to have the value written because
+     // we may want to read and write the data at the same address
+     data_out_a<=data_in_a;
+   end
+   else
     begin
-      if(we_a)
-        ram[addr_a] <= data_a;
-      else
-        q_a <= ram[addr_a]; 
+      data_out_a<=ram[addr_a];
     end
-  
-  always @ (posedge clk)
+end
+
+
+ // For port B
+
+  always@(posedge clk)
+  begin
+   if(wr_b)
+   begin
+     ram[addr_b]<=data_in_b;
+     // data_out is required to have the value written because
+     // we may want to read and write the data at the same address
+     data_out_b<=data_in_b;
+   end
+   else
     begin
-      if(we_b)
-        ram[addr_b] <= data_b;
-      else
-        q_b <= ram[addr_b]; 
+      data_out_b<=ram[addr_b];
     end
-  
+end
+
+
 endmodule
